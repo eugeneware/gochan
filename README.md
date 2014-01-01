@@ -170,3 +170,16 @@ emultate the golang ```select``` primitive.
 * ```cb``` - Called when there is data on a channel. The first argument is an
   error, and the second parameter is the channel with the data. You'll still
   need to call ```.get()``` on the channel to get the data.
+
+``` js
+var gochan = require('gochan');
+var a = gochan();
+var b = gochan();
+
+gochan.select([a, b], function (err, ch) {
+  expect(ch).to.equal(a);
+  done();
+});
+
+a.put(42);
+```
