@@ -10,27 +10,6 @@ function fixture(filename) {
 }
 
 describe('gochan', function() {
-  it('should be able to do basic message passing', function(done) {
-    var ch = gochan();
-
-    var result = [];
-    setImmediate(function () {
-      result.push('before');
-      ch(42, function () {
-        result.push('after');
-        expect(result).to.eql(['before', 'received 42', 'after']);
-        done();
-      });
-    });
-
-    setImmediate(function () {
-      ch(function (err, value) {
-        if (err) return done(err);
-        result.push('received ' + value);
-      });
-    });
-  });
-
   it('should be able to use put and get functions', function(done) {
     var ch = gochan();
 
@@ -127,6 +106,18 @@ describe('gochan', function() {
     ch.get().then(function (value) {
       expect(value).to.be.a('string');
       expect(value.length).to.equal(32);
+      done();
+    });
+  });
+
+  it('should be able to get the length of the channel', function(done) {
+    var ch = gochan();
+    ch.put(1);
+    expect(ch.length()).to.equal(1);
+    ch.put(2);
+    expect(ch.length()).to.equal(2);
+    ch.get(function (err, value) {
+      expect(ch.length()).to.equal(1);
       done();
     });
   });

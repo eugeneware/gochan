@@ -4,15 +4,15 @@ module.exports = chan;
 function chan() {
   var channel = [];
 
-  var ch = function(value, cb) {
-    if (arguments.length === 2) {
-      ch.put(value, cb);
-    } else if (arguments.length === 1) {
-      ch.get(value);
+  var ch = {
+    get: get,
+    put: put,
+    length: function() {
+      return channel.length;
     }
   };
 
-  ch.put = function (value, cb) {
+  function put(value, cb) {
     if (typeof value === 'function') {
       channel.unshift(value);
     } else if (isPromise(value)) {
@@ -33,7 +33,7 @@ function chan() {
     cb && setImmediate(cb);
   }
 
-  ch.get = function (cb) {
+  function get (cb) {
     if (!channel.length) {
       return setImmediate(function () {
         ch(cb);
