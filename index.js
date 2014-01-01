@@ -13,22 +13,21 @@ function chan() {
   };
 
   function put(value, cb) {
+    var d;
     if (typeof value === 'function') {
-      channel.unshift(value);
+      d = Q.defer();
+      var fn = value;
+      fn(function (err, value) {
+        if (err) return d.reject(err);
+        d.resolve(value);
+      });
+      channel.unshift(d.promise);
     } else if (isPromise(value)) {
-      channel.unshift(function (cb) {
-        value.then(
-          function (result) {
-            cb(null, result);
-          },
-          function (err) {
-            cb(err);
-          });
-      });
+      channel.unshift(value);
     } else {
-      channel.unshift(function (cb) {
-        cb(null, value);
-      });
+      d = Q.defer();
+      d.resolve(value);
+      channel.unshift(d.promise);
     }
     cb && setImmediate(cb);
   }
@@ -39,16 +38,17 @@ function chan() {
         ch(cb);
       });
     }
-    var fn = channel.pop();
+    var promise = channel.pop();
     if (typeof cb === 'undefined') {
-      var d = Q.defer();
-      fn(function (err, result) {
-        if (err) return d.reject(err);
-        d.resolve(result);
-      });
-      return d.promise;
+      return promise;
     } else {
-      fn(cb);
+      promise.then(
+        function (value) {
+          cb(null, value);
+        },
+        function (err) {
+          cb(err);
+        });
     }
   };
 
