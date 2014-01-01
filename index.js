@@ -35,6 +35,7 @@ function chan(size) {
       d.resolve(value);
       channel.unshift(d.promise);
     }
+    flushSelectQueue();
     flushGetQueue();
     if (cb) {
       return setImmediate(cb);
@@ -89,22 +90,41 @@ function chan(size) {
   return ch;
 }
 
+var selectQueue = [];
 
 chan.select = select;
 function select(channels, cb) {
+  var d, ch;
   if (channels.length === 0) return;
   var ready = channels.filter(function (ch) {
     return ch.length() > 0;
   });
   if (ready.length === 0) {
-    return setImmediate(function () {
-      select(channels, cb);
+    return selectQueue.push({
+      channels: channels, cb: cb
     });
   } else if (ready.length === 1) {
-    return cb(null, ready[0]);
+    ch = ready[0]
   } else if (ready.length > 0) {
     var idx = Math.floor(Math.random() * ready.length);
-    return cb(null, ready[idx]);
+    ch = ready[idx];
+  }
+
+  // remove from further notifications
+  selectQueue = selectQueue.filter(function (item) {
+    return !(item.channels === channels && item.cb === cb);
+  });
+
+  if (cb) return cb(null, ch);
+}
+
+function flushSelectQueue() {
+  if (selectQueue.length) {
+    setImmediate(function () {
+      selectQueue.forEach(function (item) {
+        select(item.channels, item.cb);
+      });
+    });
   }
 }
 
