@@ -2,6 +2,7 @@ var expect = require('expect.js'),
     path = require('path'),
     fs = require('fs'),
     thunkify = require('thunkify'),
+    Q = require('q'),
     gochan = require('..');
 
 function fixture(filename) {
@@ -94,6 +95,36 @@ describe('gochan', function() {
 
     ch.get(function (err, value) {
       if (err) return done(err);
+      expect(value).to.be.a('string');
+      expect(value.length).to.equal(32);
+      done();
+    });
+  });
+
+  it('should be able to put promises on the channel', function(done) {
+    var ch = gochan();
+    function makepromise(val) {
+      var d = Q.defer();
+      setImmediate(function () {
+        d.resolve(val);
+      });
+      return d.promise;
+    }
+
+    ch.put(makepromise(42));
+    ch.get(function (err, value) {
+      if (err) return done(err);
+      expect(value).to.equal(42);
+      done();
+    });
+  });
+
+  it('should be able to get promises from the channel', function(done) {
+    var ch = gochan();
+    var readFile = thunkify(fs.readFile);
+    ch.put(readFile(fixture('sample.txt'), { encoding: 'utf8' }));
+
+    ch.get().then(function (value) {
       expect(value).to.be.a('string');
       expect(value.length).to.equal(32);
       done();

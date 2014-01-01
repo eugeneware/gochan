@@ -25,7 +25,9 @@
   "bugs": {
     "url": "https://github.com/eugeneware/gochan/issues"
   },
-  "dependencies": {},
+  "dependencies": {
+    "q": "~0.9.7"
+  },
   "devDependencies": {
     "expect.js": "~0.2.0",
     "grunt-contrib-jshint": "~0.6.4",
