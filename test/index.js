@@ -141,4 +141,38 @@ describe('gochan', function() {
       done();
     });
   });
+
+  it('should be able to have channel sizes', function(done) {
+    var ch = gochan(1);
+    ch.put(42, function () {
+      expect(ch.length()).to.equal(1);
+      setTimeout(function () {
+        ch.get(function (err, value) {
+          expect(value).to.equal(42);
+        });
+      }, 50);
+    });
+    ch.put(84, function (err) {
+      expect(ch.length()).to.equal(1);
+      ch.get(function (err, value) {
+        expect(value).to.equal(84);
+        done();
+      });
+    });
+  });
+
+  it('should be able to queue up gets efficiently', function(done) {
+    var ch = gochan();
+    ch.get(function (err, value) {
+      expect(value).to.equal(42);
+      ch.put(84);
+    });
+    ch.get(function (err, value) {
+      expect(value).to.equal(84);
+      done();
+    });
+    setTimeout(function () {
+      ch.put(42);
+    }, 50);
+  });
 });

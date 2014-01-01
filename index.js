@@ -1,8 +1,11 @@
 var Q = require('q');
 
 module.exports = chan;
-function chan() {
+function chan(size) {
+  if (typeof size === 'undefined') size = 0;
   var channel = [];
+  var putQueue = [];
+  var getQueue = [];
 
   var ch = {
     get: get,
@@ -13,6 +16,9 @@ function chan() {
   };
 
   function put(value, cb) {
+    if (size && channel.length + 1 > size) {
+      return putQueue.unshift({ value: value, cb: cb });
+    }
     var d;
     if (typeof value === 'function') {
       d = Q.defer();
@@ -29,6 +35,7 @@ function chan() {
       d.resolve(value);
       channel.unshift(d.promise);
     }
+    flushGetQueue();
     if (cb) {
       return setImmediate(cb);
     } else {
@@ -40,11 +47,10 @@ function chan() {
 
   function get(cb) {
     if (!channel.length) {
-      return setImmediate(function () {
-        ch.get(cb);
-      });
+      return getQueue.push({ cb: cb });
     }
     var promise = channel.pop();
+    flushPutQueue();
     if (typeof cb === 'undefined') {
       return promise;
     } else {
@@ -58,8 +64,31 @@ function chan() {
     }
   };
 
+  function flushGetQueue() {
+    if (getQueue.length) {
+      setImmediate(function () {
+        var item;
+        while (channel.length && (item = getQueue.shift())) {
+          ch.get(item.cb);
+        }
+      });
+    }
+  }
+
+  function flushPutQueue() {
+    if (putQueue.length && size && channel.length  < size) {
+      setImmediate(function () {
+        while (putQueue.length && ((size - channel.length) > 0)) {
+          var item = putQueue.shift();
+          ch.put(item.value, item.cb);
+        }
+      });
+    }
+  }
+
   return ch;
 }
+
 
 chan.select = select;
 function select(channels, cb) {
