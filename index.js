@@ -65,7 +65,7 @@ function chan(size) {
   };
 
   function flushGetQueue() {
-    if (getQueue.length) {
+    if (channel.length && getQueue.length) {
       setImmediate(function () {
         var item;
         while (channel.length && (item = getQueue.shift())) {
