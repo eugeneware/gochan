@@ -38,9 +38,9 @@ describe('gochan', function() {
     }
 
     var results = [];
-    var i = 0;
+    var j = 0;
     (function next() {
-      if (i++ < 5) {
+      if (j++ < 5) {
         ch.get(function (err, value) {
           if (err) return done(err);
           results.push(value);
