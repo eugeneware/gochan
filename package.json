@@ -1,7 +1,7 @@
 {
   "name": "gochan",
   "version": "0.0.1",
-  "description": "golang inspired channels for doing CSP-style concurrency",
+  "description": "golang inspired channels for doing CSP-style concurrency in node.js",
   "main": "index.js",
   "scripts": {
     "test": "node_modules/.bin/grunt ci"
