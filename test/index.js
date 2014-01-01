@@ -133,4 +133,12 @@ describe('gochan', function() {
 
     a.put(42);
   });
+
+  it('should be able to put with promises', function(done) {
+    var ch = gochan();
+    ch.put(42).then(function (value) {
+      expect(value).to.equal(42);
+      done();
+    });
+  });
 });

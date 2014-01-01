@@ -29,10 +29,16 @@ function chan() {
       d.resolve(value);
       channel.unshift(d.promise);
     }
-    cb && setImmediate(cb);
+    if (cb) {
+      return setImmediate(cb);
+    } else {
+      var _d = Q.defer();
+      _d.resolve(value);
+      return _d.promise;
+    }
   }
 
-  function get (cb) {
+  function get(cb) {
     if (!channel.length) {
       return setImmediate(function () {
         ch.get(cb);
