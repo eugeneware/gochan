@@ -3,7 +3,8 @@ var expect = require('expect.js'),
     fs = require('fs'),
     thunkify = require('thunkify'),
     Q = require('q'),
-    gochan = require('..');
+    gochan = require('..'),
+    setImmediate = global.setImmediate || process.nextTick;
 
 function fixture(filename) {
   return path.join(__dirname, 'fixtures', filename);

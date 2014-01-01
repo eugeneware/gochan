@@ -1,4 +1,5 @@
-var Q = require('q');
+var Q = require('q'),
+    setImmediate = global.setImmediate || process.nextTick;
 
 module.exports = chan;
 function chan(size) {
