@@ -121,4 +121,16 @@ describe('gochan', function() {
       done();
     });
   });
+
+  it('should be able to select between multiple channels', function(done) {
+    var a = gochan();
+    var b = gochan();
+
+    gochan.select([a, b], function (err, ch) {
+      expect(ch).to.equal(a);
+      done();
+    });
+
+    a.put(42);
+  });
 });

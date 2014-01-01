@@ -35,7 +35,7 @@ function chan() {
   function get (cb) {
     if (!channel.length) {
       return setImmediate(function () {
-        ch(cb);
+        ch.get(cb);
       });
     }
     var promise = channel.pop();
@@ -53,6 +53,24 @@ function chan() {
   };
 
   return ch;
+}
+
+chan.select = select;
+function select(channels, cb) {
+  if (channels.length === 0) return;
+  var ready = channels.filter(function (ch) {
+    return ch.length() > 0;
+  });
+  if (ready.length === 0) {
+    return setImmediate(function () {
+      select(channels, cb);
+    });
+  } else if (ready.length === 1) {
+    return cb(null, ready[0]);
+  } else if (ready.length > 0) {
+    var idx = Math.floor(Math.random() * ready.length);
+    return cb(null, ready[idx]);
+  }
 }
 
 function isPromise(obj) {
